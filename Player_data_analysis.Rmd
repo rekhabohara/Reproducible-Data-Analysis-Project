@@ -1,0 +1,891 @@
+---
+title: "Reproducible Data"
+author: "Rekha Bohara Bastakoti"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# **NBA Season- Chicago Bulls' Best Five Starting Players for 2019-20**
+## Introduction
+Basketball is a popular sport worldwide, and the NBA is one of the world's top professional basketball leagues consists of 30 teams.
+The Chicago Bulls, one of the teams in the NBA, had a poor performance in the last season, finishing 27th out of 30 teams in the league based on win-loss record. For the upcoming 2019-20 NBA season, the team's budget for player contracts is $118 million, which ranks them 26th out of the 30 teams.
+
+As a data analyst for the Chicago Bulls, I have been tasked with finding the best five starting players for the team for the upcoming 2019-20 NBA season within a budget of $118 million. The goal is to select one player from each position who can contribute to the team's success and are worth the investment.
+
+To accomplish this task, I will analyze the provided datasets, including player statistics and salaries from the previous season and team statistics from the 2018-19 NBA season. I will use R to perform data cleaning, analysis, and visualization to identify the best players for the team
+
+### Description of Senario:
+The scenario involves being a data analyst for the Chicago Bulls basketball team in the NBA. The task is to find the best five starting players for the team for the upcoming 2019-20 NBA season within a limited budget of $118 million for player contracts, using various datasets containing player and team statistics as well as player salaries.
+
+
+### The aim of the Project:
+The aim of this project is to find the best five starting players for the Chicago Bulls that the team can afford for the upcoming 2019-20 NBA season.The goal is to select one player from each position and make sure they are worth the investment and present analysis report for the general manager of Chicago Bulls.
+
+### Justification and Environment:
+This project is to help the Chicago Bulls improve their performance in the upcoming NBA season by identifying the most valuable players for the team within their budget.we use R programming language and various R packages for data analysis and visualization. The data provided in CSV files will be imported into R for analysis and the final report will be presented in data frames and graphs summarizing the findings, as well as recommendations for the best five starting players for the team within their budget. The final outcome will be a reproducible data analysis project and a knitr report using R Markdown describing the findings.
+
+
+## Data Collecton
+To complete this task, we will use the following datasets:
+
+**2018-19_nba_player-statistics.csv:** This dataset contains the statistics for all the players who played in the NBA during the 2018-19 season.
+
+**2018-19_nba_player-salaries.csv:** This dataset contains the salary information for all the players who played in the NBA during the 2018-19 season.
+
+**2019-20_nba_team-payroll.csv:** This dataset contains the payroll information for all the teams in the NBA for the 2019-20 season.
+
+**2018-19_nba_team-statistics_1.csv:** This dataset contains the team statistics for all the teams in the NBA during the 2018-19 season.
+
+**2018-19_nba_team-statistics_2.csv:** This dataset contains additional team statistics for all the teams in the NBA during the 2018-19 season.
+
+*Description of Variable :** 
+*https://uclearn.canberra.edu.au/courses/13262/pages/data-description-reproducible-data-analysis-project*
+
+
+
+
+## Data Preparation 
+Data preparation is the process of transforming raw data into a form that is suitable for analysis. This process includes various steps such as data cleaning, data integration, data transformation, and data reduction.
+
+### Reading and Tidying Data 
+We will start by reading the raw data into R and cleaning it. We will load the some R packages, which contains a suite of packages for data manipulation and visualization.
+
+**tidyverse:** A collection of packages for data manipulation, exploration, and visualization that follow the "tidy" data principles.
+
+**dplyr:**  Package for data manipulation, including filtering, selecting, and transforming data.
+
+**ggplot2:** Used for data visualization, providing a powerful grammar of graphics for creating a wide range of plots.
+
+**GGally:** A package for creating exploratory data analysis plots, including scatterplot matrices and parallel coordinate plots.
+
+**broom:** Package for converting statistical analysis output into tidy data frames for easier visualization and manipulation.
+
+**corrplot:** For creating correlation matrix plots, providing a visual representation of the relationships between variables in a data set.
+
+**This code is Importing several data sets into R using the "read_csv()" function, which is part of the "readr" package.** 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Library used 
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(broom)
+library(corrplot)
+library(ggpubr)
+
+
+# Load provided data sets into R using the read.csv() function.
+Player_salaries <- read_csv("data/2018-19_nba_player-salaries.csv",show_col_types = FALSE)
+Player_statistics <- read_csv("data/2018-19_nba_player-statistics.csv" ,show_col_types = FALSE)
+Team_statistics_1 <- read_csv("data/2018-19_nba_team-statistics_1.csv" ,show_col_types = FALSE )
+Team_statistics_2 <- read_csv("data/2018-19_nba_team-statistics_2.csv" ,show_col_types = FALSE)
+Team_payroll <- read_csv("data/2019-20_nba_team-payroll.csv",show_col_types = FALSE)
+
+
+
+```
+Once the data sets are loaded, the code uses the "head()", "summary()", and "str()" functions to inspect the data sets. The "head()" function is used to display the first few rows of "Player_salaries", while the "summary()" function is used to summarize the variables in "Player_statistics". The "str()" function is used to display the structure of both "Player_salaries" and "Player_statistics", including the variable names, data types, and the first few observations of each variable.
+
+```{r}
+
+head(Player_statistics)
+summary(Player_statistics)
+
+
+
+```
+
+### Joining Data
+
+From the output, we can see that the player statistics contains information about each player's name, team, position, games played, minutes played, field goal percentage, three-point percentage, free throw percentage, rebounds, assists, steals, blocks, turnovers, and points and Player Salaries contains player name and Salaries 
+
+We combine the player statistics and player salaries data sets using the player name as the key through left_join
+"left join" is used to merge two tables based on a common column and include all the rows from the left table and only matching rows from the right table
+
+
+```{r}
+#Combine the player statistics and player salaries data sets using the player name as the key. 
+
+Player_stat_Salaries <- left_join(Player_statistics, Player_salaries, by = "player_name")
+
+Player_stat_Salaries <- Player_stat_Salaries %>% mutate(Points_per_min = PTS / MP)
+
+Player_stat_Salaries[sapply(Player_stat_Salaries, is.character)] <- lapply(Player_stat_Salaries[sapply(Player_stat_Salaries,is.character)],as.factor)
+str(Player_stat_Salaries)
+
+
+
+
+
+
+
+```
+
+The histogram plot indicates that the distribution of "Points_per_min" feature is approximately symmetric, with the majority of values clustering around the center of the distribution. However, there appear to be a few outliers with unusually high values.
+```{r}
+
+ggplot(Player_stat_Salaries, aes(x = Points_per_min)) +
+geom_histogram(binwidth = 0.2, color = "black", fill = "lightblue") +
+labs(x = "Points per minute", y = "Count", title = "Distribution of Points per Minute") +
+theme_classic()
+
+
+
+```
+
+### Cleaning Data
+we first calculates the total number of missing values in each column of the dataset using the colSums() and is.na() functions and imputed the missing values in numeric columns using the median of the respective column values using mutate() and across() functions.we also checked for duplicate rows in the dataset using the duplicated() function, and prints the number of duplicate rows using sum()
+
+```{r}
+# Calculate the total number of missing values and errors in each column
+missing_errors <- Player_stat_Salaries %>% summarize(across(everything(), list(missing = ~sum(is.na(.)), errors = ~sum(!is.na(.) & !is.finite(.)))))
+
+#Impute Missing Values with Median
+Player_stat_Salaries <- Player_stat_Salaries %>% mutate(across(where(is.numeric), ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+# Check for duplicate rows
+dup_rows <- Player_stat_Salaries[duplicated(Player_stat_Salaries),]
+num_dup_rows <- nrow(dup_rows)
+
+
+errors <- sum(!complete.cases(Player_stat_Salaries))
+if (errors > 0) {
+  print(paste("There are", errors, "error(s) in the data."))
+} else {
+  print("There are no errors in the data.")
+}
+
+# Check for missing values (NAs)
+nas <- sum(is.na(Player_stat_Salaries))
+if (nas > 0) {
+  print(paste("There are", nas, "missing value(s) in the data."))
+} else {
+  print("There are no missing values in the data.")
+}
+
+# Check for duplicate rows
+duplicates <- sum(duplicated(Player_stat_Salaries))
+if (duplicates > 0) {
+  print(paste("There are", duplicates, "duplicate row(s) in the data."))
+} else {
+  print("There are no duplicate rows in the data.")
+}
+
+
+```
+### Tidy Data
+we are renaming the important column names in a dataset called "Player_stat_Salaries" using the dplyr package's rename() function. The new names are more descriptive and easier to understand while analyzing the data. The column names are then converted to lowercase and certain characters like parentheses and dashes are removed from them using stringr package's str_replace_all() function. The team and position columns are also converted to factor variables. This step makes the data tidier and easier to work with for future analyses.
+```{r}
+#Reame Col NAmes as its very confusing 
+
+Player_stat_Salaries_Processed <- Player_stat_Salaries %>%
+  rename(
+         "Field_Goals" = FG,
+         "Field_Goal_Attempts" = FGA,
+         "Free_Throws" = FT,
+         "Free_Throw_Attempts" = FTA,
+         "Team" = Tm,
+         "Position" = Pos,
+         "Games" = G,
+         "Games_Started" = GS,
+         "Minutes_Played" = MP,
+         "Field_Goal_Percentage" = `FG%`,
+         "Field_goal_3_Percentage" = `3P%`,
+         "Field_goal_2_Percentage" = `2P%`,
+         "Offensive_Rebounds" = ORB,
+         "Defensive_Rebounds" = DRB,
+         "Total_Rebounds" = TRB,
+         "Assists" = AST,
+         "Steals" = STL,
+         "Blocks" = BLK,
+         "Turnovers" = TOV,
+         "Personal_Fouls" = PF,
+         "Points"= PTS,
+      "Effective_Field_Goal_Percentage" =`eFG%`,
+      "Free_Throw_Percentage" = `FT%` ) 
+
+names(Player_stat_Salaries_Processed) <- str_replace_all(string = names(Player_stat_Salaries_Processed),
+pattern = "[()-]",replacement = "")
+names(Player_stat_Salaries_Processed) <- tolower(names(Player_stat_Salaries_Processed))
+
+#Treat the  variable as categorical
+Player_stat_Salaries_Processed$team <- as.factor(Player_stat_Salaries_Processed$team)
+Player_stat_Salaries_Processed$position <- as.factor(Player_stat_Salaries_Processed$position)
+
+Player_stat_Salaries_Processed <- separate_rows(Player_stat_Salaries_Processed,position,sep='-')
+
+```
+
+Lets calculate the median values of steals, blocks, points,rebound and assists for each player position to check how different positions contribute to different aspects of the game. For example, centers tend to have higher blocks and rebounding stats, while guards tend to have higher assist and steals stats. By calculating the median values for each position, we can get a better understanding of what is typical for each position and how they compare to each other. This information can be useful in analyzing player performance, drafting strategies,and more.
+
+```{r}
+player_position <- Player_stat_Salaries_Processed %>% group_by(position) %>% summarise(steals_stat=median(steals),
+blocks_stat=median(blocks),
+points=median(points),                                                                                                
+rebounds =median(total_rebounds),
+field_goal_att =median(field_goal_attempts),
+assists_stat= median(assists))
+
+```
+
+## Exploratory analysis
+The exploratory data analysis (EDA) was conducted to gain a better understanding of the data and identify any potential issues or patterns.
+
+### Checking the distribution of variables
+Series of box plots visualizing the distribution of various player statistics for different positions visualization
+The box plots show the distribution of the data for each position, with the box representing the interquartile range (IQR) of the data, the whiskers extending to the minimum and maximum values within 1.5 times the IQR from the box, and any outliers represented as individual points.
+
+```{r}
+
+ggplot(Player_stat_Salaries_Processed, aes(x = position, y = points)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightblue", color = "black", size = 1, outlier.color = "red", outlier.size = 3) +
+  labs(title = "Points distribution by position", x = "Position", y = "Points") +
+  theme_minimal()
+
+ggplot(Player_stat_Salaries_Processed, aes(x = position, y = assists)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightgray", color = "black", size = 1, outlier.color = "red", outlier.size = 3) +
+  labs(title = "Assists distribution by position", x = "Position", y = "Assists") +
+  theme_bw()
+
+ggplot(Player_stat_Salaries_Processed, aes(x = position, y = field_goal_attempts)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightyellow", color = "black", size = 1, outlier.color = "red", outlier.size = 3) 
+  labs(title = "Steals distribution by position", x = "Position", y = "Field Goals Attemp") +
+   theme_minimal()
+
+ggplot(Player_stat_Salaries_Processed, aes(x = position, y = blocks)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightgreen", color = "black", size = 1, outlier.color = "red", outlier.size = 3) 
+  labs(title = "Blocks distribution by position", x = "Position", y = "Blocks") +
+  theme_bw()
+
+  
+  ggplot(Player_stat_Salaries_Processed, aes(x = position, y = total_rebounds)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightpink", color = "black", size = 1, outlier.color = "red", outlier.size = 3) 
+  labs(title = "Total Rebound distribution by position", x = "Position", y = "Total Rebounds") +
+  theme_bw()
+  
+  
+ ggplot(Player_stat_Salaries_Processed, aes(x = position, y = salary)) +
+  geom_boxplot() +
+  geom_boxplot(fill = "lightblue", color = "black", size = 1, outlier.color = "red", outlier.size = 3) 
+  labs(title = "Salary distribution by position", x = "Position", y = "Salary") +
+   theme_minimal()
+  
+
+
+```
+
+## Feature Engineering
+Feature engineering is the process of transforming raw data into features that can be used by a machine learning algorithm to improve its performance. In this case, combining the two data sets and calculating a new feature, Points per Minute, can be considered a feature engineering task. By creating this new feature, we are providing the algorithm with additional information that may be useful in making predictions about player performance and salary. 
+we also converting character variables to factors is a common preprocessing step that can help make the data more machine-readable and improve the performance of some algorithms.
+
+By dividing the respective total stats by the number of games played and rounding to two decimal places using the round() function. These variables will now contain the per game averages for each player, which can be used for further analysis.
+
+
+
+
+
+```{r}
+Player_stat_Salaries_Processed <- Player_stat_Salaries_Processed %>% mutate(points_per_game=round(points/games,2),
+                                        assits_per_game=round(assists/games,2),
+                                        steal_per_game=round(steals/games,2),
+                                        block_per_game=round(blocks/games,2),
+                                        total_rebounds_per_game =round(total_rebounds/games,2),
+                                        free_throws_per_game=round(free_throws/games,2),
+                                        turn_over_per_game=round(turnovers/games,2),
+                                        field_goals_per_game=round(field_goals/games,2),
+                                        free_thro_miss=round((free_throw_attempts-free_throws)/games,2),
+                                       field_goal_miss=round((field_goal_attempts-field_goals)/games,2))
+
+```
+
+
+### Efficiency Metrics
+The efficiency rating is a metric used in basketball to measure the overall contribution of a player to his team's performance. It takes into account not only scoring but also other aspects of the game such as assists, steals, blocks,total rebounds and  A higher efficiency rating indicates a more productive and impactful player.
+
+*efficiency = (points per game + assists per game + steals per game + blocks per game + total rebounds per game - free throw misses per game - field goal misses per game - turnovers per game)*
+
+[Details about efficiency ]https://en.wikipedia.org/wiki/Efficiency_(basketball)
+
+```{r}
+
+#Finding Efficiency rating
+Player_stat_Salaries_Processed <- Player_stat_Salaries_Processed %>% mutate(efficiency=round((points_per_game+assits_per_game+steal_per_game+block_per_game-
+                                          free_thro_miss-field_goal_miss-turn_over_per_game),2))
+```
+
+The above code filters out the players who have played less than 10 games and arranges the remaining players in descending order of their efficiency rating to ensure that the analysis is based on a significant sample of games and that the player's performance is consistent across a reasonable number of games. By filtering out players with fewer games, we can avoid the influence of outliers and random fluctuations in performance that may occur in a small sample size. This helps to ensure that the analysis is based on a more representative sample and is more reliable.
+
+```{r}
+
+Final_processed <- Player_stat_Salaries_Processed %>% filter(games>10) %>% arrange(desc(efficiency))
+summary(Final_processed)
+
+```
+A summary of the variables in Final_processed, including the number of observations, the mean, median, and quartile values for numeric variables, and the count and frequency of levels for categorical variables.Since, final_processed contains a large number of variables, the output of summary() may be difficult to interpret in this case as limitation.
+
+Instead, we focus on specific variables of interest and use appropriate visualizations and statistical methods to explore relationships and differences between groups through visualizations and statistical methods for exploring relationships between variables include scatter plots, correlation coefficients,and linear regression.
+
+**The count of each position**
+```{r}
+ ggplot(data = Final_processed, aes(x = position)) +
+  geom_bar(stat = "count", fill = "lightblue", colour = "black") +
+  ggtitle("Count of Position") +
+  xlab("Position") +
+  ylab("Count")
+
+
+```
+**Distribution of Graph**: The given player stats dataset is represented by a bar graph which displays the count of each position in the dataset. This visualization provides a quick overview of the distribution of players across different positions, allowing for easy comparison of the frequency of each position in the dataset.
+
+
+**The number of players in each age group**
+```{r}
+ggplot(Final_processed)+ geom_histogram(mapping = aes(x = age), 
+                 binwidth = 5,         # Adjust bin width to 5
+                 colour = "black", 
+                 fill = "lightblue", 
+                 alpha = 0.8           # Add some transparency to the bars
+                 ) +
+  labs(title = "Distribution of Age", 
+       x = "Age", 
+       y = "Frequency") + 
+  theme_classic()
+
+```
+**Insights**:The histogram plot illustrates the frequency distribution of age in the player dataset, showing the number of players in each age group. Based on the plot, it can be observed that the average age of the players falls within the range of 20-25 years.
+
+**Distribution of Games Played by Players **
+```{r}
+ggplot(Final_processed)+ geom_histogram(mapping = aes(x = games), 
+                 binwidth = 5,         # Adjust bin width to 5
+                 colour = "black", 
+                 fill = "lightblue", 
+                 alpha = 0.8           # Add some transparency to the bars
+                 ) +
+  labs(title = "Distribution of games", 
+       x = "Games", 
+       y = "Frequency") + 
+  theme_classic()
+
+```
+**Insights**:The histogram shows that most players have played between 60 to 80 games in the given dataset, with a peak at around 80 games. 
+
+
+
+**The distribution of the field goal percentage**
+```{r}
+ggplot(Final_processed) +
+  geom_histogram(mapping = aes(x = field_goal_percentage),
+                 binwidth = 0.02,  # Adjust bin width to 0.02
+                 colour = "black",
+                 fill = "lightblue",
+                 alpha = 0.8      # Add some transparency to the bars
+                 ) +
+  labs(title = "Distribution of Field Goal Percentage",
+       x = "Field Goal Percentage",
+       y = "Frequency") +
+  theme_classic() 
+```
+**Graph Insights:**The graph indicates that the majority of players have a field goal percentage between 0.4 to 0.5, with a few players having a higher or lower percentage as outlier. This symmetric graph can be used to identify the average field goal percentage of players and to compare the field goal percentage of individual players to the average.
+
+**Distribution of Points:**The given player stats dataset is represented by a histogram which displays the distribution of points scored by players. This visualization provides a quick overview of the spread of points scored by players, allowing for easy comparison of the frequency of different ranges of points
+```{r}
+ggplot(Final_processed)+ geom_histogram(mapping = aes(x = points), 
+                 binwidth = 50,         # Adjust bin width to 5
+                 colour = "black", 
+                 fill = "lightblue", 
+                 alpha = 0.8           # Add some transparency to the bars
+                 ) +
+  labs(title = "Distribution of Age", 
+       x = "Points", 
+       y = "Frequency") + 
+  theme_classic()
+```
+**Insights**: we can see that the majority of players have a relatively low number of points, with the distribution being right-skewed. The main concentration of points is between 100 and 1000, with a few players having very high point totals.
+
+
+**Distribution of Assists**:This visualization provides a quick overview of the spread of assists made by players, allowing for easy comparison of the frequency of different ranges of assists.with the majority of players having a relatively low number of assists, and the distribution being right-skewed with concentration of points is less than 300, with a few players having very high point totals.
+```{r}
+ggplot(Final_processed)+ geom_histogram(mapping = aes(x = assists), 
+                 binwidth = 50,         # Adjust bin width to 5
+                 colour = "black", 
+                 fill = "lightblue", 
+                 alpha = 0.8           # Add some transparency to the bars
+                 ) +
+  labs(title = "Distribution of Age", 
+       x = "assits", 
+       y = "Frequency") + 
+  theme_classic()
+```
+
+**Distribution of Steals:**Distribution of Steals:The boxplot for Steals shows that there are some outliers above the upper whisker, indicating some players with exceptionally high steal values
+
+```{r}
+ggplot(Final_processed) +
+  geom_boxplot(mapping = aes(x = "", y = steals),
+               fill = "lightblue",  # Fill color of the box
+               alpha = 0.8,         # Add some transparency to the box
+               outlier.color = "red" # Color of the outliers
+               ) +
+  labs(title = "Distribution of Steals ",
+       x = "",
+       y = "Steals") +
+  theme_classic() 
+```
+
+**Distribution of blocks:**
+The boxplot shows the distribution of the blocks in the dataset. The median block value is less than 50, while the majority of blocks range from approximately 10 to 35. There are some outliers in the data, which indicate players with an unusually high number of blocks.
+
+```{r}
+ggplot(Final_processed) +
+  geom_boxplot(mapping = aes(x = "", y = blocks),
+               fill = "lightblue",  # Fill color of the box
+               alpha = 0.8,         # Add some transparency to the box
+               outlier.color = "red" # Color of the outliers
+               ) +
+  labs(title = "Distribution of Blocks ",
+       x = "",
+       y = "Blocks") +
+  theme_classic() 
+```
+
+## Checking for relationships between variables:
+We check for relationships between variables in order to understand how they are related or associated with each other. By analyzing the relationship between variables, we can determine if they have a positive, negative, or neutral relationship, and if the relationship is significant or not. This information is useful in making predictions, identifying patterns, and developing models that can be used to predict outcomes based on one or more variables. Furthermore, it can also help us to identify potential confounding variables that may be affecting the relationship between the variables of interest.
+
+
+```{r}
+
+
+ggplot(Final_processed, aes(x = points_per_game, y = efficiency)) +
+  geom_point(aes(color = points_per_game), size = 3)  +
+  geom_smooth(method = "lm", se = FALSE, color = "black", size = 1) +
+  labs(title = "Relationship between Points per Game and Efficiency",
+       x = "Points per Game",
+       y = "Efficiency") +
+  theme_classic()
+
+
+```
+
+**Findings**:There is a positive correlation between efficiency and points per game in the plot, it's important to note that correlation doesn't necessarily imply causation. Therefore, we cannot conclude that increasing efficiency will directly lead to an increase in points per game without considering other factors that may be at play. Additionally, further analysis is necessary to determine the strength and significance of this correlation. 
+
+
+
+
+**Relationship between Efficiency and Effective Field Goal Percentage by Position**
+```{r}
+
+
+
+ggplot(Final_processed, aes(x = effective_field_goal_percentage, y = efficiency)) +
+  geom_point(aes(color = effective_field_goal_percentage), size = 3)  +
+  geom_smooth(method = "lm", se = FALSE, color = "black", size = 1) +
+  labs(title = "Relationship between Effective Field Goal Percentage per Game and Efficiency",
+       x = "Effective Field Goal Percentage by Position",
+       y = "Efficiency") +
+  theme_classic()
+
+
+
+
+```
+Point Guards tend to have higher efficiency and effective field goal percentages on average compared to other positions.This plot could be useful for coaches or analysts to identify which positions may need improvement in terms of shooting efficiency.
+
+
+**Assists per game and efficiency**
+```{r}
+
+
+
+ggplot(Final_processed, aes(x = assits_per_game, y = efficiency)) +
+  geom_point(aes(color = assists), size = 3)  +
+  geom_smooth(method = "lm", se = FALSE, color = "black", size = 1) +
+  labs(title = "Relationship between Assists per Game and Efficiency",
+       x = "assits",
+       y = "Efficiency") +
+  theme_classic()
+
+
+
+
+
+
+```
+**Analysis:** There appears to be a positive correlation between the two variables, as evidenced by the trend line in the plot. However, it's important to note that correlation does not necessarily imply causation, and further analysis would be needed to determine the strength and significance of this relationship.
+
+
+**Analysis between Efficiency and Rebounds **
+
+```{r}
+
+
+ggplot(Final_processed, aes(x = total_rebounds, y = efficiency)) +
+  geom_point(aes(color = total_rebounds), size = 3)  +
+  geom_smooth(method = "lm", se = FALSE, color = "black", size = 1) +
+  labs(title = "Relationship between Total Rebound per Game and Efficiency",
+       x = "Total Rebound",
+       y = "Efficiency") +
+  theme_classic()
+
+
+
+
+
+
+```
+**Analysis from relationship between variables and groups**
+
+Efficiency is main Variables which helps us to determine the performs ability,and I'm checking which variables are related to each other .
+
+**Steals vs Assists**
+Based on the scatter plot, it seems that there is a positive correlation between the number of steals and assists. This suggests that players who tend to have more steals also tend to have more assists. However, since both variables may be correlated with efficiency, there is a risk of multicollinearity if we include both variables in our model. To address this, we may choose to only include assists in our model since it has a stronger relationship with efficiency and may provide better results.
+
+```{r}
+ggplot(Final_processed, aes(x = steal_per_game, y = assits_per_game)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Steals vs. Assists",
+       x = "Steals",
+       y = "Assists")
+
+```
+
+
+**Blocks vs Steals**
+The scatterplot between Blocks and Steals shows a positive correlation between the two variables. This means that players who get more steals tend to also get more blocks on average. 
+
+```{r}
+ggplot(Final_processed, aes(x = steal_per_game, y = blocks)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Steals vs. blocks",
+       x = "Steals",
+       y = "blocks")
+
+```
+
+### Exploring correlations between variables:
+Exploring correlations among variables is important as it helps us to understand how different variables are related to each other and to identify patterns and trends in the data. This information can be useful in predicting future outcomes and making data-driven decisions.It can provide valuable insights into player performance and can inform strategies for team building and player recruitment.
+
+Correlation coefficient indicates the strength of a linear relationship between two variables. Its values vary between -1 and 1. A coefficient with a value close to -1 indicates a strong negative relationship, a coefficient close to 0 suggests the lack of linear relationship, and a coefficient with a value close to 1 suggests a strong positive relationship
+
+```{r}
+
+
+
+vars_to_select <- c("field_goal_attempts", "field_goal_3_percentage", "field_goal_2_percentage",
+                    "effective_field_goal_percentage", "total_rebounds_per_game", "points_per_game",
+                    "steal_per_game", "block_per_game", "salary", "free_throws_per_game", 
+                    "field_goals_per_game", "efficiency")
+
+corr_processed <- Final_processed[, vars_to_select]
+
+
+corr_matrix <- cor(corr_processed)
+
+# plot correlation matrix
+
+corrplot(corr_matrix, method = "circle", type = "upper", tl.col = "black",
+         tl.srt = 45, tl.cex = 0.8, tl.offset = 0.1, cl.pos = "n", 
+         main = "Correlation Plot Between Variables", cex.main = 1.2)
+
+
+
+
+```
+
+
+
+
+A correlation plot, such as the one produced using the corrplot function in R, is a graphical way to explore the relationship between variables. In this plot, each variable is represented by a circle, and the size and color of the circle correspond to the magnitude and direction of the correlation with other variables.
+
+Visually, the plot can be used to identify patterns in the data. For example, a group of variables that are highly correlated with each other will appear as a cluster of similarly-colored circles. Similarly, variables with low or negative correlations will be represented by smaller, differently-colored circles.
+
+Statistically, correlation coefficients can be calculated to quantify the strength and direction of the relationship between variables. A correlation coefficient of 1 indicates a perfect positive correlation, while a coefficient of -1 indicates a perfect negative correlation. A coefficient of 0 indicates no correlation. In general, coefficients with absolute values greater than 0.5 are considered to indicate a moderate to strong correlation.
+
+
+By calculating the correlation matrix between independent variables and identifying those with high correlation coefficients. Including highly correlated variables in the model can lead to multicollinearity.
+
+### Key Metrics for Players Performance
+ 
+**1.Efficiency:**
+Efficiency is calculated by subtracting a player's missed shots, turnovers, and free throw misses from their total points, rebounds,   assists, steals, and blocks. A high efficiency rating indicates that a player is making a significant positive impact on the game.  
+
+**2. Assists:**
+Assists are a metric that measures a player's ability to pass the ball to their teammates in a way that leads to successful shots or points scored. This metric is particularly important for players who play point guard that involve a lot of ball-handling and playmaking. A high number of assists can indicate that a player is effective at setting up their teammates for successful plays.   
+
+**3. Blocks:**
+Blocks are a metric that measures a player's ability to prevent their opponents from scoring by blocking their shots. This metric is particularly important for players who play in the front court, such as centers and power forwards. A high number of blocks can indicate that a player is effective at defending the rim and preventing their opponents from scoring.
+
+**4. Steals:**
+Steals are a metric that measures a player's ability to disrupt their opponents' offensive plays by stealing the ball from them.A high number of steals can indicate that a player is effective at disrupting their opponents' plays and creating turnovers that can lead to successful scoring opportunities for their team.
+  
+
+
+## Data Modeling :
+The provided code creates a linear regression model to predict the efficiency rating of basketball players based on various performance metrics. The independent variables include points per game, field goal percentage, assists per game, steals per game, and blocks per game. The tidy() function is used to display the model results in a readable format, including the coefficients, standard errors, t-values, p-values, and confidence intervals of the independent variables. These results can be used to assess the significance of each variable in predicting the efficiency rating.
+
+```{r}
+Modeling_data_set <- Final_processed %>%  select(player_name ,position,games,field_goal_percentage,                         field_goal_3_percentage,field_goal_2_percentage,effective_field_goal_percentage,
+                                                 free_throw_percentage,total_rebounds,points_per_game,assits_per_game,steal_per_game,block_per_game,
+                                                 free_throws_per_game,turn_over_per_game,field_goals_per_game,salary,efficiency)
+
+fit <- lm(data=Modeling_data_set,efficiency~points_per_game +field_goal_percentage + assits_per_game + steal_per_game + block_per_game)
+ tidy(fit,conf.int = TRUE)
+
+
+```
+
+The linear regression equation can be expressed as**y = b + b1x1 + b2x2 + ...** where y is the dependent variable (efficiency), b is the intercept, b1, b2, ... are the regression coefficients, and x1, x2, ... are the independent variables (points per game, field goal percentage).
+
+**Equation:**
+
+**The intercept** in a linear regression model represents the predicted value of the dependent variable efficiency.When all independent variables points per game, field goal percentage, assists per game, steals per game, and blocks per game are equal to zero.
+
+**The slope** for points per game represents the change in efficiency that we expect to see for a player for every one-point increase in their average points per game, while holding their field goal percentage, assists per game, steals per game, and blocks per game constant.
+
+
+
+
+### Multiocllinearity of given Variables
+The scatter plot matrix does not show any strong patterns or relationships between these variables. This indicate that there is no multicollinearity present among these variables, meaning that they are not highly correlated with each other.
+
+```{r}
+
+pairs(formula = ~ points_per_game +field_goal_percentage + assits_per_game + steal_per_game + block_per_game , data = Modeling_data_set)
+
+
+
+```
+
+
+
+
+```{r}
+
+car::vif(fit)
+
+
+```
+**VIF and Regression Coefficients**
+The Variance Inflation Factor is a measure of the degree of multicollinearity between each predictor variable and the other variables in the model. A VIF value of 1 indicates no correlation between the predictor variable and the other variables, while a VIF value greater than 1 suggests some degree of correlation.
+where,
+A VIF value greater than 5 suggests high correlation between the corresponding predictor variable and the other variables in the model, which can affect the accuracy and interpret ability of the regression coefficients. Conversely, if all VIF values are less than 5, it suggests no significant multicollinearity in the model.
+
+In this specific model, the coefficients for the predictor variables are as follows:
+
+**points_per_game:** Every additional point scored per game, the player's efficiency rating is expected to increase by 2.30 on average.  
+
+**field_goal_percentage:** Increase in field goal percentage, the player's efficiency rating is expected to increase by 1.37 on average.  
+
+**assists_per_game:** Assist made per game, the player's efficiency rating is expected to increase by 2.24 on average.  
+
+**steals_per_game** Steal made per game, the player's efficiency rating is expected to increase by 2.06 on average.  
+
+**blocks_per_game:**For every additional block made per game, the player's efficiency rating is expected to increase by 1.57 on average.
+
+
+```{r}
+summary(fit)
+```
+**Interpretation of Model**
+The linear regression model predicts a player's efficiency. Each additional point per game is expected to increase the rating by 0.51 on average, while a 1% increase in field goal percentage is expected to increase the rating by 6.86 on average. The model has a high R-squared of 0.9786, indicating that it explains much of the variance in the data, and the F-statistic of 5499 with a p-value <2.2e-16 suggests that the model is significant.
+
+**Resiudal  Standard Error: The residual standard error (RSE)** is a metric that measures the difference between the observed values and the predicted values of the dependent variable in the linear regression model. In this particular model, the RSE has a very good value of 0.6352, which indicates that the model has a low amount of unexplained variability. In other words, the model's predicted values are very close to the actual values, with an average difference of 0.6352 units. This is a positive sign that the model is a good fit for the data and that it can provide accurate predictions for the dependent variable
+
+**Adjusted R-Squared** As the number of independent variables increases in a model, multiple R-squared may increase even if the new variables don't contribute significantly. Adjusted R-squared addresses this by penalizing unnecessary variables and provides a more accurate measure of the model's goodness of fit. The adjusted R-squared of 0.9784 which indicates that the model explains 97.84% of the dependent variable's variance after adjusting for the number of independent variables. 
+
+**F-statsic** The p-value is a measure of the strength of evidence against the null hypothesis. A p-value less than 0.05 means that there is less than a 5% chance that the results are due to random chance, which indicates a statistically significant result. In this case, since the p-values associated with each independent variable in the regression model are less than 0.05, we can conclude that the independent variables are correlated with the dependent variable and the model is statistically significant.
+
+*However, the high multicollinearity between the predictor variables may affect the accuracy of the regression coefficients, so caution is necessary.*
+
+### Predicting the Efficnecy
+
+```{r}
+
+Modeling_data_set$predict <- predict(fit)
+Final_Result <- Modeling_data_set %>% select(player_name,position,points_per_game ,field_goal_percentage ,assits_per_game ,steal_per_game ,block_per_game,salary,efficiency , predict)
+
+
+```
+
+
+**Observed vs Predicted graphs**
+```{r}
+
+ggplot(Final_Result, aes(x = efficiency, y = predict)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  labs(title = "Observed vs. Predicted Efficiency",
+       x = "Observed Efficiency",
+       y = "Predicted Efficiency")
+
+
+
+
+```
+
+The accuracy metrics of the observed vs predicted for our given model.
+The red line in the graph represents the line of perfect prediction, where the predicted efficiency equals the observed efficiency. The closer the points are to this line, the more accurate our model's predictions are and the graph shows that our model's predictions are fairly accurate, as most of the points are clustered around the red line.
+
+
+
+```{r}
+
+# Calculate mean squared error (MSE)
+mse <- mean((Final_Result$efficiency - Final_Result$predict)^2)
+
+# Calculate root mean squared error (RMSE)
+rmse <- sqrt(mse)
+
+# Calculate mean absolute error (MAE)
+mae <- mean(abs(Final_Result$efficiency - Final_Result$predict))
+
+
+cat(paste("MSE:", round(mse, 2), "\n"))
+cat(paste("RMSE:", round(rmse, 2), "\n"))
+cat(paste("MAE:", round(mae, 2), "\n"))
+
+
+
+```
+**MSE** is the average of the squared differences between the predicted and observed values. A smaller MSE indicates better accuracy.
+
+**RMSE** is the square root of MSE, which puts the error in the same units as the dependent variable.
+
+**MAE** is the average of the absolute differences between the predicted and observed values. It is less sensitive to outliers than **MSE**.
+
+The MSE of 0.4, RMSE of 0.63, and MAE of 0.46 indicate that the model's predictions are generally accurate, with relatively low error between the predicted and observed values.
+A lower value of MSE, RMSE, and MAE indicates better accuracy of the model's predictions.
+
+```{r}
+
+
+# Filter players by position
+Position_C <- Final_Result %>% filter(position=="C")
+Position_PF <- Final_Result %>% filter(position=="PF")
+Position_PG <- Final_Result %>% filter(position=="PG")
+Position_SF <- Final_Result %>% filter(position=="SF")
+Position_SG <- Final_Result %>% filter(position=="SG")
+
+# Define budget
+budget <- 118000000
+
+# Select top player for each position within budget
+players <- data.frame()
+
+if (nrow(Final_Result) > 0) {
+  SG <- Position_SG %>% filter(salary <= budget/5) %>% slice(1)
+  players <- rbind(players, SG)
+}
+
+if (nrow(Position_PG) > 0) {
+  PG <- Position_PG %>% filter(salary <= budget/5) %>% slice(1)
+  players <- rbind(players, PG)
+}
+
+if (nrow(Position_SF) > 0) {
+  SF <- Position_SF %>% filter(salary <= budget/5) %>% slice(1)
+  players <- rbind(players, SF)
+}
+
+if (nrow(Position_PF) > 0) {
+  PF <- Position_PF %>% filter(salary <= budget/5) %>% slice(1)
+  players <- rbind(players, PF)
+}
+
+if (nrow(Position_C) > 0) {
+  C <- Position_C %>% filter(salary <= budget/5) %>% slice(1)
+  players <- rbind(players, C)
+}
+
+# Print selected player
+subset(players,select=player_name:position)
+
+# Calculate remaining budget
+used_budget <- sum(players$salary)
+remaining_budget <- budget - used_budget
+cat("Used Budget: $", used_budget/1000000, " million\n")
+cat("Remaining Budget: $", remaining_budget/1000000, " million\n")
+
+# Create plot of player salaries
+ggplot(players, aes(x = player_name, y = log10(salary))) +
+  geom_point(size = 3, color = "red") +
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
+  geom_text(aes(label = position),hjust = 1.1) +
+  labs(title = "Salary by Player Name",
+       x = "Player Name",
+       y = "Salary (log10)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 20, face = "bold", margin = margin(b = 10)),
+        axis.title = element_text(size = 14),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+
+# Summary:
+
+We analyzed data from the 2018-19 NBA season to identify the top-performing players for each position within our budget constraints. We focused on key performance indicators such as points per game, field goal percentage, assists per game, steals per game, and blocks per game. We found that SG is the most common position in the NBA, followed by PG and SF. Higher efficiency is correlated with higher salaries, and there is a positive correlation between efficiency and points per game and field goal percentage. We have identified the top players for each position based on their performance, ability to contribute to the team's overall performance, and salaries. Our findings provide valuable insights into the NBA player market and can inform decisions related to player acquisition and team management.
+
+**Point Guard (PG):** The point guard is typically the team's primary ball-handler and playmaker. They are responsible for bringing the ball up the court, setting up offensive plays, and getting the ball to their teammates in positions where they can score. A good point guard needs to have strong ball-handling, passing, and shooting skills, as well as the ability to read the defense and make quick decisions.
+
+**Shooting Guard (SG):** The shooting guard is typically the team's best perimeter scorer. They are responsible for shooting from the outside, driving to the basket, and cutting to the basket for quick scores. A good shooting guard needs to have strong shooting and scoring skills, as well as the ability to move well without the ball, communicate effectively with their teammates, and play solid defense.
+
+**Small Forward (SF):** The small forward is typically a versatile player who can contribute in many areas of the game. They are responsible for scoring, rebounding, defending, and passing, and often play a "wing" position between the guards and the forwards. A good small forward needs to have a well-rounded skill set and the ability to play multiple positions on the court.
+
+**Power Forward (PF):** The power forward is typically a strong, physical player who can score and rebound effectively in the key. They are responsible for playing close to the basket, blocking shots, and getting offensive rebounds. A good power forward needs to have strong post moves, rebounding, and defensive skills, as well as the ability to communicate well with their teammates.
+
+**Center (C):** The center is typically the tallest player on the team and plays in the key area of the court. They are responsible for blocking shots, rebounding, and scoring close to the basket. A good center needs to have strong post moves, rebounding, and shot-blocking skills, as well as the ability to pass effectively and communicate with their teammates.
+
+
+### Player Justification:
+
+**Devin Booker, our shooting guard(SG)**, boasts impressive shooting percentages of 46.7% from the field and 88% from the free-throw line, along with an average of 6.77 assists per game. He is a versatile offensive threat, able to direct plays and create shots for himself and his teammates.
+
+**Kyrie Irving, our point guard (PG)**, has solid shooting percentages of 48.7% from the field and 51% from the three-point line, with an average of 6.93 assists per game. He is a scoring point guard with exceptional ball handling and passing skills.
+
+**Kawhi Leonard, our small forward(SF)**, has a strong shooting percentage of 49.6% from the field and averages 1.77 steals per game. He is a well-rounded player with an average of 26.6 points per game, making him a valuable asset as a "wing" player.
+
+**Tobias Harris, our power forward(PF)**, has solid shooting percentages of 49.6% from the field and 44% from the three-point line, with an average of 2.73 assists per game. He is a skilled offensive player with exceptional communication skills and movement without the ball.
+
+**Karl-Anthony Towns, our center (C)**, has a dominant presence in the key, with a strong shooting percentage of 51.8% from the field and an average of 1.62 blocks per game. He is a versatile scorer, able to score from close range and beyond the key.
+
+Selection of these players for their respective positions is an intelligent and strategic decision that will strengthen our team's performance within our budget.
+
+## Conclusion:
+
+In conclusion, our analysis shows that the Chicago Bulls can improve their team's performance by selecting the top-performing players from each position that they can afford. The selected players have the potential to significantly improve the team's overall performance in the upcoming season, and this could be a key factor in the team's success. However, the team must also consider investing in data analysis tools to better evaluate player performance and potential, as well as increasing their budget for player contracts to remain competitive in the league.We believe that our analysis provides valuable insights for the team and can help them make informed decisions that will benefit their performance and success in the NBA.
+
+
+
+### References
+[University of canberra :](https://www.canberra.edu.au/)
+[Wikipedia](https://en.wikipedia.org/wiki/Basketball_positions)
+[ESPN. (2019). NBA Standings - 2019. Retrieved May 7, 2023, from](https://www.espn.com/nba/standings/_/season/2019/group/league)
+[NBA Advanced Stats: This site provides advanced stats and analytics for NBA players and teams, including player tracking data, shooting charts, lineup data, and much more.] (https://www.nba.com/stats/advanced)
+[Datacamp - Data Science in R:](https://www.datacamp.com/courses/data-science-in-r)
+[Coursera - Data Science in R:](https://www.coursera.org/specializations/jhu-data-science-r)
+[edX - Data Science Essentials in R:](https://www.edx.org/course/data-science-essentials-r-microsoft-dat204x-2)
+[Udacity - Data Analyst Nanodegree:](https://www.udacity.com/course/data-analyst-nanodegree--nd002)
+[Kaggle Learn - Data Science in R:] (https://www.kaggle.com/learn/data-science-in-r)
+[RStudio - Data Science Tutorials:](https://www.rstudio.com/online-learning/)
+(https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/more-guidance/guide-to-data-analytics-and-the-australian-privacy-principles)
+
+*[Kindly note that the data analysis presented here is solely for academic purposes, conducted for the University of Canberra. It is important to note that certain references provided in this analysis may require authentication to access.]*
+
+
+
+
+
+
