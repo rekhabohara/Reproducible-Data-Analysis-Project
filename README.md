@@ -1,7 +1,7 @@
 
 ## Project Information
 
-This project is a reproducible data analysis project that requires a data analyst to help the Chicago Bulls, an NBA team, find the best five starting players that the team can afford for the next season. The data sets provided are sourced from basketball-reference.com and hoopshype.com/salaries. The project aims to use these data sets to analyze player statistics and salaries, team payrolls, and team statistics to find the best players for the team.
+This project is a reproducible data analysis project that requires a data analyst to help the Chicago Bulls, an NBA team, find the best five starting players that the team can afford for the next season.  The project aims to use these data sets to analyze player statistics and salaries, team payrolls, and team statistics to find the best players for the team.
 
 The project is hosted on a GitHub repository and includes a README.md file that describes the repository's contents, a data folder containing raw data and processed data files, a knitr report in html format that documents the analysis and findings, and a raw R Markdown file used to generate the knitr report.
 
