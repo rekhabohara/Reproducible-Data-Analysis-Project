@@ -17,5 +17,3 @@ This Project is divided into five sections:
 
 **Player recommendations** The key part of the project that recommends the best five starting players based on the analysis and findings of the previous sections.
 
-*Kindly note that the data analysis presented here is solely for academic purposes, conducted for the University of Canberra. It is important to note that certain references provided in this analysis may require authentication to access*
-
